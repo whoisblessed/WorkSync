@@ -14,3 +14,5 @@ class Event(Base):
     description: Mapped[str] = mapped_column(String(500))
     start_at: Mapped[datetime] = mapped_column()
     end_at: Mapped[datetime] = mapped_column()
+
+    employees: Mapped[list["Employee"]] = relationship(secondary="employee_events", back_populates="events")

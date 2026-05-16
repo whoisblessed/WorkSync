@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     database: DatabaseSettings
     jwt: JWTSettings
 
-    model_config = ConfigDict(env_file=".env", env_nested_delimeter="__")
+    model_config = ConfigDict(env_file=".env", env_nested_delimiter="__")
 
 
 settings = Settings()

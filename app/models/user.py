@@ -19,3 +19,5 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255))
     hashed_password: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column()
+
+    employee: Mapped["Employee"] = relationship(back_populates="user")
