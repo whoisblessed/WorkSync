@@ -1,9 +1,16 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from enum import Enum
 
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
+
+
+if TYPE_CHECKING:
+    from app.models import Employee
 
 
 class Role(Enum):
@@ -20,4 +27,4 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column()
 
-    employee: Mapped["Employee"] = relationship(back_populates="user")
+    employee: Mapped[Employee] = relationship(back_populates="user")
