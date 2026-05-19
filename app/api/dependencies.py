@@ -11,7 +11,7 @@ from app.db.session import get_db
 from app.models import User
 from app.models.user import Role
 from app.repositories import UserRepository
-from app.services import AuthService
+from app.services import AuthService, UserService
 
 
 DBSession = Annotated[AsyncSession, Depends(get_db)]
@@ -32,6 +32,12 @@ def get_auth_service(
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> AuthService:
     return AuthService(user_repository)
+
+
+def get_user_service(
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UserService:
+    return UserService(user_repository)
 
 
 # Аутентификация

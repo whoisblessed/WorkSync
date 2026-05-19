@@ -5,6 +5,11 @@ class AppException(HTTPException):
     pass
 
 
+class BadRequestException(AppException):
+    def __init__(self, detail="Некорректный запросж."):
+        super().__init__(status.HTTP_400_BAD_REQUEST, detail)
+
+
 class NotFoundException(AppException):
     def __init__(self, detail: str = "Ресурс не найден") -> None:
         super().__init__(status.HTTP_404_NOT_FOUND, detail)

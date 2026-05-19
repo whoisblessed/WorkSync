@@ -24,6 +24,7 @@ class Schedule(Base):
     __tablename__ = "schedules"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    time_zone: Mapped[str] = mapped_column(default="Europe/Moscow")
     work_format: Mapped[WorkFormat] = mapped_column(default=WorkFormat.office)
     start_at: Mapped[time] = mapped_column(default=time(9, 0))
     end_at: Mapped[time] = mapped_column(default=time(18, 0))

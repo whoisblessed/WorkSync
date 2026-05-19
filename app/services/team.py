@@ -16,7 +16,7 @@ class TeamService:
         try:
             team = await self.team_repository.get_active_by_id(id)
         except MultipleResultsFound:
-            raise ConflictException(f"Найдено несколько команд с id {id}")
+            raise ConflictException(f"Найдено несколько команд с ID {id}")
 
         if team is None:
             raise NotFoundException(f"Команда с ID {id} не найдена или неактивна")

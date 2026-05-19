@@ -17,7 +17,6 @@ class Employee(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     first_name: Mapped[str] = mapped_column(String(255))
     last_name: Mapped[str] = mapped_column(String(255))
-    time_zone: Mapped[str] = mapped_column(default="Europe/Moscow")
     is_active: Mapped[bool] = mapped_column(default=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
