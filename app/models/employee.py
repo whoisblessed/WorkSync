@@ -18,17 +18,16 @@ class Employee(Base):
     first_name: Mapped[str] = mapped_column(String(255))
     last_name: Mapped[str] = mapped_column(String(255))
     time_zone: Mapped[str] = mapped_column(default="Europe/Moscow")
+    is_active: Mapped[bool] = mapped_column(default=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id"))
 
     user: Mapped[User] = relationship(back_populates="employee")
     team: Mapped[Team] = relationship(back_populates="employees")
-    schedule: Mapped[Schedule] = relationship(
-        back_populates="employee", cascade="all, delete-orphan"
-    )
+    schedule: Mapped[Schedule] = relationship(back_populates="employee")
     schedule_exceptions: Mapped[list[ScheduleException]] = relationship(
-        back_populates="employee", cascade="all, delete-orphan"
+        back_populates="employee"
     )
     events: Mapped[list[Event]] = relationship(
         secondary="employee_events", back_populates="employees"

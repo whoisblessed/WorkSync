@@ -28,6 +28,7 @@ class Event(Base):
     description: Mapped[str] = mapped_column(String(500))
     start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    is_active: Mapped[bool] = mapped_column(default=True)
 
     employees: Mapped[list[Employee]] = relationship(
         secondary="employee_events", back_populates="events"

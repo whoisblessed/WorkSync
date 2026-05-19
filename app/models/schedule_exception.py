@@ -29,6 +29,7 @@ class ScheduleException(Base):
     description: Mapped[str | None] = mapped_column(String(500))
     start_date: Mapped[date] = mapped_column()
     end_date: Mapped[date] = mapped_column()
+    is_active: Mapped[bool] = mapped_column(default=True)
 
     employee_id: Mapped[int] = mapped_column(ForeignKey("employees.id"))
 

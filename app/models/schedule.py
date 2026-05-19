@@ -31,6 +31,7 @@ class Schedule(Base):
     shift_work_days: Mapped[int] = mapped_column(default=5)
     shift_rest_days: Mapped[int] = mapped_column(default=2)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    is_active: Mapped[bool] = mapped_column(default=True)
 
     employee_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), unique=True)
 
