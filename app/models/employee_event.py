@@ -7,7 +7,7 @@ from app.db import Base
 class EmployeeEvent(Base):
     __tablename__ = "employee_events"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    employee_id: Mapped[int] = mapped_column(ForeignKey("employees.id"))
-    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"))
+    employee_id: Mapped[int] = mapped_column(
+        ForeignKey("employees.id"), primary_key=True
+    )
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), primary_key=True)

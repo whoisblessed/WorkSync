@@ -10,7 +10,7 @@ from app.db import Base
 
 
 if TYPE_CHECKING:
-    from app.models import Employee
+    from app.models import Employee, Team
 
 
 class Role(Enum):
@@ -23,8 +23,10 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column()
+    is_active: Mapped[bool] = mapped_column(default=True)
 
     employee: Mapped[Employee] = relationship(back_populates="user")
+    teams: Mapped[list[Team]] = relationship(back_populates="manager")

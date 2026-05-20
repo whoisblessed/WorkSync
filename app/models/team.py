@@ -15,10 +15,11 @@ class Team(Base):
     __tablename__ = "teams"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
+    name: Mapped[str] = mapped_column(String(255), unique=True)
     description: Mapped[str] = mapped_column(String(500))
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    manager_id: Mapped[int] = relationship(ForeignKey("users.id"))
+    manager_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     employees: Mapped[list[Employee]] = relationship(back_populates="team")
     manager: Mapped[User] = relationship(back_populates="teams")
