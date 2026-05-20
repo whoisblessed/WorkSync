@@ -14,7 +14,20 @@ class UserCreate(BaseModel):
         ),
     ]
     password: Annotated[
-        SecretStr, Field(max_length=255, description="Пароль, до 255 символов")
+        str, Field(max_length=255, description="Пароль, до 255 символов")
+    ]
+
+
+class UserFullCreate(UserCreate):
+    email: Annotated[
+        EmailStr,
+        Field(
+            max_length=255,
+            description="Электронная почта пользователя, до 255 символов",
+        ),
+    ]
+    password: Annotated[
+        str, Field(max_length=255, description="Пароль, до 255 символов")
     ]
     role: Annotated[
         Role, Field(description="Роль пользователя: manager, HR или employee")
@@ -37,7 +50,6 @@ class UserUpdate(BaseModel):
 class User(BaseModel):
     id: Annotated[int, Field(description="Уникалльный индентификатор пользователя")]
     email: Annotated[str, Field(description="Электронная почта пользователя")]
-    hashed_password: Annotated[str, Field(description="Захешированный пароль")]
     role: Annotated[Role, Field(description="Роль пользователя")]
     is_active: Annotated[bool, Field(description="Активность пользователя")]
 

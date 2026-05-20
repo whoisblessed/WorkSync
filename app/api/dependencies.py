@@ -5,7 +5,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import UnauthorizedException
+from app.core.exceptions import UnauthorizedException, ForbiddenException
 from app.core.security import decode_token
 from app.db.session import get_db
 from app.models import User
@@ -74,7 +74,7 @@ def user_require_roles(*roles: Role):
         user: Annotated[User, Depends(get_current_user)],
     ) -> User:
         if user.role not in roles:
-            raise UnauthorizedException(
+            raise ForbiddenException(
                 f"Действие доступно только пользователям с правами: {roles_str}"
             )
 

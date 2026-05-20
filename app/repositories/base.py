@@ -15,7 +15,7 @@ class BaseRepository(Generic[ModelType]):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_all_active(self) -> list[ModelType]:
+    async def get_all(self) -> list[ModelType]:
         result = await self.session.scalars(
             select(self.model).where(self.model.is_active)
         )
@@ -27,7 +27,7 @@ class BaseRepository(Generic[ModelType]):
         )
         return result.all()
 
-    async def get_active_by_id(self, obj_id: int) -> ModelType | None:
+    async def get_by_id(self, obj_id: int) -> ModelType | None:
         return await self.session.scalar(
             select(self.model).where(self.model.id == obj_id, self.model.is_active)
         )

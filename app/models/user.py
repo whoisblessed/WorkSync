@@ -10,7 +10,7 @@ from app.db import Base
 
 
 if TYPE_CHECKING:
-    from app.models import Employee
+    from app.models import Employee, Team
 
 
 class Role(Enum):
@@ -29,3 +29,4 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     employee: Mapped[Employee] = relationship(back_populates="user")
+    teams: Mapped[list[Team]] = relationship(back_populates="manager")

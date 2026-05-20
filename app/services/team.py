@@ -14,7 +14,7 @@ class TeamService:
 
     async def get_team_by_id(self, id: int) -> Team | None:
         try:
-            team = await self.team_repository.get_active_by_id(id)
+            team = await self.team_repository.get_by_id(id)
         except MultipleResultsFound:
             raise ConflictException(f"Найдено несколько команд с ID {id}")
 

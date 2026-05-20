@@ -25,12 +25,12 @@ class AuthService:
 
     def issue_access_token(self, user: User) -> AccessToken:
         return AccessToken(
-            access_token=create_access_token({"sub": user.email, "role": user.role})
+            access_token=create_access_token({"sub": user.email, "role": user.role.value})
         )
 
     def issue_tokens(self, user: User) -> Tokens:
         return Tokens(
-            access_token=create_access_token({"sub": user.email, "role": user.role}),
+            access_token=create_access_token({"sub": user.email, "role": user.role.value}),
             refresh_token=create_refresh_token({"sub": user.email}),
         )
 
@@ -51,6 +51,6 @@ class AuthService:
 
         user = await self.user_repository.get_by_email(payload.get("sub"))
         if user is None:
-            raise UnauthorizedException(f"Пользователь не найден или неактивен")
+            raise UnauthorizedException("Пользователь не найден или неактивен")
 
         return self.issue_access_token(user)

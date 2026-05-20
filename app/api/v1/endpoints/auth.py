@@ -8,7 +8,7 @@ from app.shemas.token import Tokens, AccessToken, RefreshTokenRequest
 from app.services import AuthService
 
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=Tokens)
