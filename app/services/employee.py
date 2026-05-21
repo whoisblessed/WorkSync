@@ -1,6 +1,5 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.core.constants import ROLE_CREATION_PERMISSIONS
 from app.core.exceptions import (
     ForbiddenException,
     NotFoundException,

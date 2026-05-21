@@ -40,7 +40,7 @@ class UserService:
             raise ConflictException(f"Пользователь с email {user.email} уже существует")
 
     async def update(self, id: int, user: UserUpdate) -> User:
-        db_user = await self.get_by_id(id)        
+        db_user = await self.get_by_id(id)
         try:
             return await self.user_repository.update(
                 db_user,

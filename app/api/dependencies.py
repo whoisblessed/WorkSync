@@ -10,8 +10,8 @@ from app.core.security import decode_token
 from app.db.session import get_db
 from app.models import User
 from app.models.user import Role
-from app.repositories import UserRepository
-from app.services import AuthService, UserService
+from app.repositories import UserRepository, TeamRepository
+from app.services import AuthService, UserService, TeamService
 
 
 DBSession = Annotated[AsyncSession, Depends(get_db)]
@@ -23,6 +23,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=F
 
 def get_user_repository(session: DBSession) -> UserRepository:
     return UserRepository(session)
+
+
+def get_team_repository(session: DBSession) -> TeamRepository:
+    return TeamRepository(session)
 
 
 # Сервисы
@@ -38,6 +42,12 @@ def get_user_service(
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> UserService:
     return UserService(user_repository)
+
+
+def get_team_service(
+    team_repository: Annotated[TeamRepository, Depends(get_team_repository)],
+) -> TeamService:
+    return TeamService(team_repository)
 
 
 # Аутентификация

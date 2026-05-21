@@ -39,7 +39,9 @@ async def get_by_id(
     return await user_service.get_by_id(id)
 
 
-@router.post("/register", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=UserSchema, status_code=status.HTTP_201_CREATED
+)
 async def register(
     user: UserCreateSchema,
     user_service: Annotated[UserService, Depends(get_user_service)],
@@ -53,25 +55,26 @@ async def register(
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user: UserFullCreateSchema,
-    current_user: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     """
     Регистрация нового пользователя от роли "HR".
     """
-    return await user_service.register_user(user, current_user)
+    return await user_service.register_user(user)
 
 
 @router.patch("/", response_model=UserSchema)
 async def update(
+    id: int,
     user: UserUpdateSchema,
-    current_user: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     """
     Обновление пользователя от роли "HR".
     """
-    return await user_service.update(user, current_user)
+    return await user_service.update(id, user)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -86,7 +89,7 @@ async def deactivate(
     await user_service.deactivate_by_id(id)
 
 
-@router.post("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.patch("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def activate(
     id: int,
     _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],

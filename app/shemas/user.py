@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field, EmailStr, SecretStr, ConfigDict
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 from app.models.user import Role
 

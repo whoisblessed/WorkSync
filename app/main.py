@@ -5,7 +5,9 @@ from app.api.v1.router import api_router
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.app.name, summary="Когда нажал на компутир", version="1.0.0")
+    app = FastAPI(
+        title=settings.app.name, summary="Когда нажал на компутир", version="1.0.0"
+    )
 
     app.include_router(api_router)
 
