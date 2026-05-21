@@ -17,7 +17,7 @@ from app.services import UserService
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/my", response_model=UserSchema)
+@router.get("/me", response_model=UserSchema)
 async def get_current(
     current_user: Annotated[UserModel, Depends(get_current_user)],
 ) -> UserSchema:

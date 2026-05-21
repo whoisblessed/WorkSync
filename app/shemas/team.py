@@ -3,6 +3,9 @@ from typing import Annotated
 from pydantic import BaseModel, Field, ConfigDict
 
 
+# Создание
+
+
 class TeamCreate(BaseModel):
     name: Annotated[str, Field(description="Название команды, до 255 символов")]
     description: Annotated[
@@ -11,8 +14,14 @@ class TeamCreate(BaseModel):
     manager_id: Annotated[int, Field(description="ID менеджера команды")]
 
 
+# Обновление
+
+
 class TeamUpdate(TeamCreate):
     pass
+
+
+# Ответ
 
 
 class Team(BaseModel):

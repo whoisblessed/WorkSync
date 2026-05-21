@@ -18,16 +18,27 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 @router.get("/", response_model=list[TeamSchema])
 async def get_all(
-    current_user: Annotated[UserModel, Depends(get_current_user)],
+    current_user: Annotated[
+        UserModel, Depends(user_require_roles(Role.manager, Role.hr))
+    ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> list[TeamSchema]:
     """
     Получение всех команд для ролей "employee", "manager", "HR".
-    "HR" доступны все команды, "manager" только свои,
-    "employee" только та, в которой он состоит.
-    !!!Для "employee" пока что не реализовано!!!
+    "HR" доступны все команды, "manager" только свои.
     """
     return await team_service.get_all(current_user)
+
+
+@router.get("/me", response_model=TeamSchema)
+async def get_my(
+    current_user: Annotated[UserModel, Depends(user_require_roles(Role.employee))],
+    team_service: Annotated[TeamService, Depends(get_team_service)],
+) -> TeamSchema:
+    """
+    Получение своей команды для роли "employee".
+    """
+    return await team_service.get_by_user(current_user)
 
 
 @router.get("/{id}", response_model=TeamSchema)
@@ -40,7 +51,6 @@ async def get_by_id(
     Получение команды по id для ролей "employee", "manager", "HR".
     "HR" доступны все команды, "manager" только свои,
     "employee" только та, в которой он состоит.
-    !!!Для "employee" пока что не реализовано!!!
     """
     return await team_service.get_by_id(id, current_user)
 
