@@ -8,7 +8,7 @@ from app.core.exceptions import (
 )
 from app.core.security import hash_password
 from app.models import User
-from app.shemas.user import UserCreate, UserUpdate
+from app.shemas.user import UserCreate, UserFullUpdate
 from app.repositories import EmployeeRepository
 
 

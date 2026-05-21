@@ -1,24 +1,28 @@
-from sqlalchemy.exc import MultipleResultsFound
+from sqlalchemy.exc import IntegrityError
 
-from app.core.exceptions import NotFoundException, ConflictException
-from app.models import Team
+from app.core.constants import ROLE_CREATION_PERMISSIONS
+from app.core.exceptions import ForbiddenException
+from app.models import User, Team
+from app.models.user import Role
+from app.shemas.team import TeamCreate, TeamUpdate
 from app.repositories import TeamRepository
+from app.services import UserService
+
 
 
 class TeamService:
-    def __init__(self, team_repository: TeamRepository) -> None:
+    def __init__(self, team_repository: TeamRepository, user_service: UserService) -> None:
         self.team_repository = team_repository
-
-    async def get_all_teams(self) -> list[Team]:
-        return await self.team_repository.get_all_active()
-
-    async def get_team_by_id(self, id: int) -> Team | None:
-        try:
-            team = await self.team_repository.get_by_id(id)
-        except MultipleResultsFound:
-            raise ConflictException(f"Найдено несколько команд с ID {id}")
-
-        if team is None:
-            raise NotFoundException(f"Команда с ID {id} не найдена или неактивна")
-
-        return team
+        self.user_service = user_service
+      
+    async def get_all_by_manager_id(self, id: int, current_user: User) -> list[Team]:
+        if current_user.role == Role.manager and id != current_user.id:
+            raise ForbiddenException("Пользователям с ролью \"manager\" можно смотреть только свои команды")
+        
+        return await self.team_repository.get_all_by_manager_id(id)
+    
+    async def create(self, team: TeamCreate, current_user: User) -> Team:
+        if current_user.role == Role.
+        
+        manager = await self.user_service.get_by_id(team.manager_id)
+        

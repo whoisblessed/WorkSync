@@ -5,13 +5,13 @@ from app.api.v1.router import api_router
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.app.name, version="1.0.0")
+    app = FastAPI(title=settings.app.name, summary="Когда нажал на компутир", version="1.0.0")
 
     app.include_router(api_router)
 
-    @app.get("/", tags=["root"])
-    async def index():
-        return {"message": "Система по актуализации рабочего времени WorkTime Sync"}
+    @app.get("/health", tags=["health"])
+    async def health():
+        return {"status": "Ок"}
 
     return app
 

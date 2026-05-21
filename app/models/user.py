@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
 
 class Role(Enum):
+    employee: str = "employee"
     manager: str = "manager"
     hr: str = "HR"
-    employee: str = "employee"
 
 
 class User(Base):

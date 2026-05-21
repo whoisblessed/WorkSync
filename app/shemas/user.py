@@ -5,6 +5,9 @@ from pydantic import BaseModel, Field, EmailStr, SecretStr, ConfigDict
 from app.models.user import Role
 
 
+# Создание
+
+
 class UserCreate(BaseModel):
     email: Annotated[
         EmailStr,
@@ -19,19 +22,12 @@ class UserCreate(BaseModel):
 
 
 class UserFullCreate(UserCreate):
-    email: Annotated[
-        EmailStr,
-        Field(
-            max_length=255,
-            description="Электронная почта пользователя, до 255 символов",
-        ),
-    ]
-    password: Annotated[
-        str, Field(max_length=255, description="Пароль, до 255 символов")
-    ]
     role: Annotated[
         Role, Field(description="Роль пользователя: manager, HR или employee")
     ]
+
+
+# Обновление
 
 
 class UserUpdate(BaseModel):
@@ -45,6 +41,9 @@ class UserUpdate(BaseModel):
     role: Annotated[
         Role | None, Field(description="Роль пользователя: manager, HR или employee")
     ]
+
+
+# Ответ
 
 
 class User(BaseModel):
