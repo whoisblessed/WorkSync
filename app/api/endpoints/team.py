@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from app.api.dependencies import get_current_user, user_require_roles, get_team_service
+from app.api.dependencies import get_current_user, get_user_with_roles, get_team_service
 from app.models import User as UserModel
 from app.models.user import Role
 from app.shemas.team import (
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 @router.get("/", response_model=list[TeamSchema])
 async def get_all(
     current_user: Annotated[
-        UserModel, Depends(user_require_roles(Role.manager, Role.hr))
+        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> list[TeamSchema]:
@@ -31,12 +31,12 @@ async def get_all(
 
 
 @router.get("/me", response_model=TeamSchema)
-async def get_my(
-    current_user: Annotated[UserModel, Depends(user_require_roles(Role.employee))],
+async def get_me(
+    current_user: Annotated[UserModel, Depends(get_current_user)],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> TeamSchema:
     """
-    Получение своей команды для роли "employee".
+    Получение своей команды.
     """
     return await team_service.get_by_user(current_user)
 
@@ -44,13 +44,14 @@ async def get_my(
 @router.get("/{id}", response_model=TeamSchema)
 async def get_by_id(
     id: int,
-    current_user: Annotated[UserModel, Depends(get_current_user)],
+    current_user: Annotated[
+        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
+    ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> list[TeamSchema]:
     """
-    Получение команды по id для ролей "employee", "manager", "HR".
-    "HR" доступны все команды, "manager" только свои,
-    "employee" только та, в которой он состоит.
+    Получение команды по id для ролей "manager", "HR".
+    "HR" доступны все команды, "manager" только свои.
     """
     return await team_service.get_by_id(id, current_user)
 
@@ -59,7 +60,7 @@ async def get_by_id(
 async def create(
     team: TeamCreateSchema,
     current_user: Annotated[
-        UserModel, Depends(user_require_roles(Role.manager, Role.hr))
+        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> TeamSchema:
@@ -75,7 +76,7 @@ async def update(
     id: int,
     team: TeamUpdateSchema,
     current_user: Annotated[
-        UserModel, Depends(user_require_roles(Role.manager, Role.hr))
+        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> TeamSchema:
@@ -90,7 +91,7 @@ async def update(
 async def deactivate(
     id: int,
     current_user: Annotated[
-        UserModel, Depends(user_require_roles(Role.manager, Role.hr))
+        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> None:
@@ -105,7 +106,7 @@ async def deactivate(
 async def activate(
     id: int,
     current_user: Annotated[
-        UserModel, Depends(user_require_roles(Role.manager, Role.hr))
+        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> None:

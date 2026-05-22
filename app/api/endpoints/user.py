@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from app.api.dependencies import get_current_user, user_require_roles, get_user_service
+from app.api.dependencies import get_current_user, get_user_with_roles, get_user_service
 from app.models import User as UserModel
 from app.models.user import Role
 from app.shemas.user import (
@@ -30,7 +30,7 @@ async def get_current(
 @router.get("/{id}", response_model=UserSchema)
 async def get_by_id(
     id: int,
-    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     """
@@ -55,7 +55,7 @@ async def register(
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user: UserFullCreateSchema,
-    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     """
@@ -68,7 +68,7 @@ async def register_user(
 async def update(
     id: int,
     user: UserUpdateSchema,
-    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
     """
@@ -80,7 +80,7 @@ async def update(
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deactivate(
     id: int,
-    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> None:
     """
@@ -92,7 +92,7 @@ async def deactivate(
 @router.patch("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def activate(
     id: int,
-    _: Annotated[UserModel, Depends(user_require_roles(Role.hr))],
+    _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> None:
     """

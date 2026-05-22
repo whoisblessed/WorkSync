@@ -22,8 +22,8 @@ class EmployeeBase(BaseModel):
 
 
 class EmployeeCreate(EmployeeBase):
-    team_id: Annotated[
-        int, Field(description="ID команды, в которой состоит сотрудник")
+    user_id: Annotated[
+        int, Field(description="ID пользователя, к которому прикреплены данные")
     ]
 
 

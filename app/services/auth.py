@@ -57,4 +57,4 @@ class AuthService:
         if user is None:
             raise UnauthorizedException("Пользователь не найден или неактивен")
 
-        return self.issue_access_token(user)
+        return self.issue_tokens(user)
