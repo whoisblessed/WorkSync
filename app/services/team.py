@@ -8,7 +8,7 @@ from app.core.exceptions import (
 )
 from app.models import User, Team
 from app.models.user import Role
-from app.shemas.team import TeamCreate, TeamUpdate
+from app.schemas.team import TeamCreate, TeamUpdate
 from app.repositories import TeamRepository
 from app.services import UserService
 
@@ -19,6 +19,8 @@ class TeamService:
     ) -> None:
         self.team_repository = team_repository
         self.user_service = user_service
+
+    # Получение
 
     async def get_all(self, current_user: User) -> list[Team]:
         """Используется в эндпойнте"""
@@ -51,8 +53,10 @@ class TeamService:
 
         return db_team
 
+    # Изменение
+
     async def create(self, team: TeamCreate, current_user: User) -> Team:
-        await self.user_service.get_by_id(
+        db_manager = await self.user_service.get_by_id(
             team.manager_id
         )  # Проверка существования пользователя
 
@@ -60,8 +64,7 @@ class TeamService:
             raise ForbiddenException(
                 "Руководитель может создавать команды только для себя"
             )
-
-        db_manager = await self.user_service.get_by_id(team.manager_id)
+        
         if db_manager.role != Role.manager:
             raise BadRequestException(
                 f"Пользователь с ID {team.manager_id} не руководитель"
@@ -83,14 +86,14 @@ class TeamService:
         try:
             return await self.team_repository.update(db_team, **team.model_dump())
         except IntegrityError:
-            return ConflictException(f"Команда с именем {team.name} уже существует")
+            raise ConflictException(f"Команда с именем {team.name} уже существует")
 
     async def deactivate(self, id: int, current_user: User) -> None:
-        db_team = self.get_by_id(id, current_user)
+        db_team = await self.get_by_id(id, current_user)
         await self.team_repository.deactivate(db_team)
 
     async def activate(self, id: int, current_user: User) -> None:
-        db_team = self.team_repository.get_inactive_by_id(id)
+        db_team = await self.team_repository.get_inactive_by_id(id)
         if db_team is None:
             raise NotFoundException(f"Команда с ID {id} не найдена или активна")
 

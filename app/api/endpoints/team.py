@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 from app.api.dependencies import get_current_user, get_user_with_roles, get_team_service
 from app.models import User as UserModel
 from app.models.user import Role
-from app.shemas.team import (
+from app.schemas.team import (
     Team as TeamSchema,
     TeamCreate as TeamCreateSchema,
     TeamUpdate as TeamUpdateSchema,
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 
 @router.get("/", response_model=list[TeamSchema])
-async def get_all(
+async def get_all_teams(
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
@@ -31,7 +31,7 @@ async def get_all(
 
 
 @router.get("/me", response_model=TeamSchema)
-async def get_me(
+async def get_my_team(
     current_user: Annotated[UserModel, Depends(get_current_user)],
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> TeamSchema:
@@ -42,13 +42,13 @@ async def get_me(
 
 
 @router.get("/{id}", response_model=TeamSchema)
-async def get_by_id(
+async def get_team_by_id(
     id: int,
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
     team_service: Annotated[TeamService, Depends(get_team_service)],
-) -> list[TeamSchema]:
+) -> TeamSchema:
     """
     Получение команды по id для ролей "manager", "HR".
     "HR" доступны все команды, "manager" только свои.
@@ -57,7 +57,7 @@ async def get_by_id(
 
 
 @router.post("/", response_model=TeamSchema, status_code=status.HTTP_201_CREATED)
-async def create(
+async def create_team(
     team: TeamCreateSchema,
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
@@ -72,7 +72,7 @@ async def create(
 
 
 @router.put("/{id}", response_model=TeamSchema)
-async def update(
+async def update_team(
     id: int,
     team: TeamUpdateSchema,
     current_user: Annotated[
@@ -88,7 +88,7 @@ async def update(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deactivate(
+async def deactivate_team(
     id: int,
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
@@ -103,7 +103,7 @@ async def deactivate(
 
 
 @router.patch("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def activate(
+async def activate_team(
     id: int,
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))

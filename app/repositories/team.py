@@ -1,5 +1,4 @@
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from app.models import Employee, Team
 from app.repositories import BaseRepository
@@ -14,8 +13,7 @@ class TeamRepository(BaseRepository[Team]):
         )
 
     async def get_all_by_manager_id(self, id: int) -> list[Team]:
-        return await self.session.scalars(
-            select(Team)
-            .where(Team.manager_id == id, Team.is_active)
-            .options(selectinload(Team.manager))
+        teams = await self.session.scalars(
+            select(Team).where(Team.manager_id == id, Team.is_active)
         )
+        return teams.all()

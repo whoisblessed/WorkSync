@@ -9,7 +9,7 @@ from app.api.dependencies import (
 )
 from app.models import User as UserModel
 from app.models.user import Role
-from app.shemas.employee import (
+from app.schemas.employee import (
     Employee as EmployeeSchema,
     EmployeeCreate as EmployeeCreateSchema,
     EmployeeUpdate as EmployeeUpdateSchema,
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/employees", tags=["employees"])
 
 
 @router.get("/", response_model=list[EmployeeSchema])
-async def get_all(
+async def get_all_employees(
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
     ],
@@ -36,7 +36,7 @@ async def get_all(
 
 
 @router.get("/me", response_model=EmployeeSchema)
-async def get_me(
+async def get_my_employee(
     current_user: Annotated[UserModel, Depends(get_current_user)],
     employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
 ) -> EmployeeSchema:
@@ -47,7 +47,7 @@ async def get_me(
 
 
 @router.get("/{id}", response_model=EmployeeSchema)
-async def get_by_id(
+async def get_employee_by_id(
     id: int,
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
@@ -63,7 +63,7 @@ async def get_by_id(
 
 
 @router.post("/", response_model=EmployeeSchema, status_code=status.HTTP_201_CREATED)
-async def create(
+async def create_employee(
     employee: EmployeeCreateSchema,
     current_user: Annotated[
         UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
@@ -79,7 +79,7 @@ async def create(
 
 
 @router.put("/", response_model=EmployeeSchema)
-async def update(
+async def update_employee(
     id: int,
     employee: EmployeeUpdateSchema,
     current_user: Annotated[

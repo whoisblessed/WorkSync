@@ -47,7 +47,7 @@ class UserUpdate(BaseModel):
 
 
 class User(BaseModel):
-    id: Annotated[int, Field(description="Уникалльный индентификатор пользователя")]
+    id: Annotated[int, Field(description="Уникальный индентификатор пользователя")]
     email: Annotated[str, Field(description="Электронная почта пользователя")]
     role: Annotated[Role, Field(description="Роль пользователя")]
     is_active: Annotated[bool, Field(description="Активность пользователя")]

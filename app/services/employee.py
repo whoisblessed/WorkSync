@@ -1,13 +1,12 @@
 from sqlalchemy.exc import IntegrityError
 
 from app.core.exceptions import (
-    ForbiddenException,
     NotFoundException,
     ConflictException,
 )
 from app.models import User, Employee
 from app.models.user import Role
-from app.shemas.employee import EmployeeCreate, EmployeeUpdate
+from app.schemas.employee import EmployeeCreate, EmployeeUpdate
 from app.repositories import EmployeeRepository
 from app.services import UserService, TeamService
 
@@ -31,8 +30,8 @@ class EmployeeService:
 
         return await self.employee_repository.get_all()
 
-    async def get_by_user(self, current_user: User) -> list[Employee]:
-        db_employee = self.employee_repository.get_by_user_id(current_user.id)
+    async def get_by_user(self, current_user: User) -> Employee:
+        db_employee = await self.employee_repository.get_by_user_id(current_user.id)
 
         if db_employee is None:
             raise NotFoundException(
@@ -47,10 +46,8 @@ class EmployeeService:
         if db_employee is None:
             raise NotFoundException(f"Сотрудник с id {id} не найден или неактивен")
 
-        if current_user.role == Role.manager and db_employee.user_id != current_user.id:
-            raise ForbiddenException(
-                f"Сотрудник не состоит в команде руководителя с id {current_user.id}"
-            )
+        if current_user.role == Role.manager:
+            await self.team_service.get_by_id(db_employee.team_id, current_user)
 
         return db_employee
 
@@ -62,24 +59,24 @@ class EmployeeService:
         )  # Проверка существования пользователя из схемы
         await self.team_service.get_by_id(
             employee.team_id, current_user
-        )  # Проверка существования команды из схемы + принадлежности к команде руководителя
+        )  # Проверка существования команды из схемы + принадлежности команды руководителю
 
         try:
             return await self.employee_repository.create(**employee.model_dump())
         except IntegrityError:
             raise ConflictException(
-                "Нельзя добавить больше 1 записи данных на сотрудника"
+                f"Личные данные на пользователя с id {employee.user_id} уже существуют"
             )
 
     async def update(
         self, id: int, employee: EmployeeUpdate, current_user: User
     ) -> Employee:
-        db_employee = await self.get_by_id(
-            id
-        )  # Получение сотрудника из схемы и проверка его существования
         await self.team_service.get_by_id(
-            db_employee.team_id, current_user
-        )  # Проверка существования команды из схемы + принадлежности к команде руководителя
+            employee.team_id, current_user
+        )  # Проверка существования команды из схемы + принадлежности команды руководителю
+        db_employee = await self.get_by_id(
+            id, current_user
+        )  # Получение сотрудника из схемы и проверка его существования
 
         return await self.employee_repository.update(
             db_employee, **employee.model_dump()

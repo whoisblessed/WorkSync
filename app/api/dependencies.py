@@ -10,8 +10,19 @@ from app.core.security import decode_token
 from app.db.session import get_db
 from app.models import User
 from app.models.user import Role
-from app.repositories import UserRepository, TeamRepository, EmployeeRepository
-from app.services import AuthService, UserService, TeamService, EmployeeService
+from app.repositories import (
+    UserRepository,
+    TeamRepository,
+    EmployeeRepository,
+    ScheduleRepository,
+)
+from app.services import (
+    AuthService,
+    UserService,
+    TeamService,
+    EmployeeService,
+    ScheduleService,
+)
 
 
 DBSession = Annotated[AsyncSession, Depends(get_db)]
@@ -31,6 +42,10 @@ def get_team_repository(session: DBSession) -> TeamRepository:
 
 def get_employee_repository(session: DBSession) -> EmployeeRepository:
     return EmployeeRepository(session)
+
+
+def get_schedule_repository(session: DBSession) -> ScheduleRepository:
+    return ScheduleRepository(session)
 
 
 # Сервисы
@@ -63,6 +78,15 @@ def get_employee_service(
     team_service: Annotated[TeamService, Depends(get_team_service)],
 ) -> EmployeeService:
     return EmployeeService(employee_repository, user_service, team_service)
+
+
+def get_schedule_service(
+    schedule_repository: Annotated[
+        ScheduleRepository, Depends(get_schedule_repository)
+    ],
+    employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
+) -> ScheduleService:
+    return ScheduleService(schedule_repository, employee_service)
 
 
 # Аутентификация

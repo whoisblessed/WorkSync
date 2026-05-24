@@ -8,7 +8,7 @@ from app.core.security import (
 )
 from app.core.exceptions import UnauthorizedException
 from app.models import User
-from app.shemas.token import AccessToken, Tokens
+from app.schemas.token import AccessToken, Tokens
 from app.repositories import UserRepository
 
 

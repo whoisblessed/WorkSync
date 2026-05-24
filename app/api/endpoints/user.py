@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 from app.api.dependencies import get_current_user, get_user_with_roles, get_user_service
 from app.models import User as UserModel
 from app.models.user import Role
-from app.shemas.user import (
+from app.schemas.user import (
     User as UserSchema,
     UserCreate as UserCreateSchema,
     UserFullCreate as UserFullCreateSchema,
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/me", response_model=UserSchema)
-async def get_current(
+async def get_my_user(
     current_user: Annotated[UserModel, Depends(get_current_user)],
 ) -> UserSchema:
     """
@@ -28,7 +28,7 @@ async def get_current(
 
 
 @router.get("/{id}", response_model=UserSchema)
-async def get_by_id(
+async def get_user_by_id(
     id: int,
     _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
@@ -42,7 +42,7 @@ async def get_by_id(
 @router.post(
     "/register", response_model=UserSchema, status_code=status.HTTP_201_CREATED
 )
-async def register(
+async def register_employee(
     user: UserCreateSchema,
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserSchema:
@@ -53,7 +53,7 @@ async def register(
 
 
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
-async def register_user(
+async def register_any_user(
     user: UserFullCreateSchema,
     _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
@@ -64,8 +64,8 @@ async def register_user(
     return await user_service.register_user(user)
 
 
-@router.patch("/", response_model=UserSchema)
-async def update(
+@router.patch("/{id}", response_model=UserSchema)
+async def update_user(
     id: int,
     user: UserUpdateSchema,
     _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
@@ -78,7 +78,7 @@ async def update(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deactivate(
+async def deactivate_user(
     id: int,
     _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],
@@ -89,8 +89,8 @@ async def deactivate(
     await user_service.deactivate_by_id(id)
 
 
-@router.patch("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def activate(
+@router.patch("/{id}/activate", status_code=status.HTTP_204_NO_CONTENT)
+async def activate_user(
     id: int,
     _: Annotated[UserModel, Depends(get_user_with_roles(Role.hr))],
     user_service: Annotated[UserService, Depends(get_user_service)],

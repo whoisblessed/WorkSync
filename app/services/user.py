@@ -4,7 +4,7 @@ from app.core.exceptions import NotFoundException, ConflictException
 from app.core.security import hash_password
 from app.models import User
 from app.models.user import Role
-from app.shemas.user import UserCreate, UserFullCreate, UserUpdate
+from app.schemas.user import UserCreate, UserFullCreate, UserUpdate
 from app.repositories import UserRepository
 
 
