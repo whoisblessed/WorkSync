@@ -8,7 +8,7 @@ from app.core.security import (
 )
 from app.core.exceptions import UnauthorizedException
 from app.models import User
-from app.shemas.token import AccessToken, Tokens
+from app.schemas.token import AccessToken, Tokens
 from app.repositories import UserRepository
 
 
@@ -25,12 +25,16 @@ class AuthService:
 
     def issue_access_token(self, user: User) -> AccessToken:
         return AccessToken(
-            access_token=create_access_token({"sub": user.email, "role": user.role.value})
+            access_token=create_access_token(
+                {"sub": user.email, "role": user.role.value}
+            )
         )
 
     def issue_tokens(self, user: User) -> Tokens:
         return Tokens(
-            access_token=create_access_token({"sub": user.email, "role": user.role.value}),
+            access_token=create_access_token(
+                {"sub": user.email, "role": user.role.value}
+            ),
             refresh_token=create_refresh_token({"sub": user.email}),
         )
 
@@ -53,4 +57,4 @@ class AuthService:
         if user is None:
             raise UnauthorizedException("Пользователь не найден или неактивен")
 
-        return self.issue_access_token(user)
+        return self.issue_tokens(user)

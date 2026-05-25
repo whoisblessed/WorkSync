@@ -1,53 +1,52 @@
-from pydantic import BaseModel, ConfigDict
+from typing import Annotated
+
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class TeamShortResponse(BaseModel):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
+# Базовые поля
 
-
-class ScheduleShortResponse(BaseModel):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
-
-
-class ScheduleExceptionShortResponse(BaseModel):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
-
-
-class EventShortResponse(BaseModel):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
 
 class EmployeeBase(BaseModel):
-    first_name: str
-    last_name: str
-    time_zone: str = "Europe/Moscow"
+    first_name: Annotated[
+        str, Field(max_length=255, description="Имя сотрудника, до 255 символов")
+    ]
+    last_name: Annotated[
+        str, Field(max_length=255, description="Фамилия сотрудника, до 255 символов")
+    ]
+    team_id: Annotated[
+        int, Field(description="ID команды, в которой состоит сотрудник")
+    ]
+
+
+# Создание
 
 
 class EmployeeCreate(EmployeeBase):
-    user_id: int
-    team_id: int
-    schedule_id: int
+    user_id: Annotated[
+        int, Field(description="ID пользователя, к которому прикреплены данные")
+    ]
 
 
-class EmployeeUpdate(BaseModel):
-    first_name: str | None = None
-    last_name: str | None = None
-    time_zone: str | None = None
-    team_id: int | None = None
-    schedule_id: int | None = None
+# Обновление
 
 
-class EmployeeResponse(EmployeeBase):
-    id: int
-    user_id: int
-    team_id: int
-    schedule_id: int
-    team: TeamShortResponse
-    schedule: ScheduleShortResponse | None = None
-    schedule_exceptions: list[ScheduleExceptionShortResponse]
-    events: list[EventShortResponse]
+class EmployeeUpdate(EmployeeBase):
+    pass
+
+
+# Ответ
+
+
+class Employee(BaseModel):
+    id: Annotated[int, Field(description="Уникальный идентификатор профиля сотрудника")]
+    first_name: Annotated[str, Field(description="Имя сотрудника")]
+    last_name: Annotated[str, Field(description="Фамилия сотрудника")]
+    is_active: Annotated[bool, Field(description="Активность профиля сотрудника")]
+    user_id: Annotated[
+        int, Field(description="ID пользователя, на которого зарегистрирован профиль")
+    ]
+    team_id: Annotated[
+        int, Field(description="ID команды, в которой состоит сотрудник")
+    ]
 
     model_config = ConfigDict(from_attributes=True)

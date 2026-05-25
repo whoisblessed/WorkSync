@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies import get_auth_service
-from app.shemas.token import Tokens, AccessToken, RefreshTokenRequest
+from app.schemas.token import Tokens, RefreshTokenRequest
 from app.services import AuthService
 
 
@@ -24,6 +24,6 @@ async def login(
 async def refresh_token(
     refresh_token: RefreshTokenRequest,
     auth_service: Annotated[AuthService, Depends(get_auth_service)],
-) -> AccessToken:
+) -> Tokens:
     """Выдает новый access JWT по refresh JWT"""
     return await auth_service.refresh(refresh_token.refresh_token)

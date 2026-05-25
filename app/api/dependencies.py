@@ -10,12 +10,23 @@ from app.core.security import decode_token
 from app.db.session import get_db
 from app.models import User
 from app.models.user import Role
-from app.repositories import UserRepository
-from app.services import AuthService, UserService
+from app.repositories import (
+    UserRepository,
+    TeamRepository,
+    EmployeeRepository,
+    ScheduleRepository,
+)
+from app.services import (
+    AuthService,
+    UserService,
+    TeamService,
+    EmployeeService,
+    ScheduleService,
+)
 
 
 DBSession = Annotated[AsyncSession, Depends(get_db)]
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
 # Репозитории
@@ -23,6 +34,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=F
 
 def get_user_repository(session: DBSession) -> UserRepository:
     return UserRepository(session)
+
+
+def get_team_repository(session: DBSession) -> TeamRepository:
+    return TeamRepository(session)
+
+
+def get_employee_repository(session: DBSession) -> EmployeeRepository:
+    return EmployeeRepository(session)
+
+
+def get_schedule_repository(session: DBSession) -> ScheduleRepository:
+    return ScheduleRepository(session)
 
 
 # Сервисы
@@ -38,6 +61,32 @@ def get_user_service(
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> UserService:
     return UserService(user_repository)
+
+
+def get_team_service(
+    team_repository: Annotated[TeamRepository, Depends(get_team_repository)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
+) -> TeamService:
+    return TeamService(team_repository, user_service)
+
+
+def get_employee_service(
+    employee_repository: Annotated[
+        EmployeeRepository, Depends(get_employee_repository)
+    ],
+    user_service: Annotated[UserService, Depends(get_user_service)],
+    team_service: Annotated[TeamService, Depends(get_team_service)],
+) -> EmployeeService:
+    return EmployeeService(employee_repository, user_service, team_service)
+
+
+def get_schedule_service(
+    schedule_repository: Annotated[
+        ScheduleRepository, Depends(get_schedule_repository)
+    ],
+    employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
+) -> ScheduleService:
+    return ScheduleService(schedule_repository, employee_service)
 
 
 # Аутентификация
@@ -67,7 +116,7 @@ async def get_current_user(
     return user
 
 
-def user_require_roles(*roles: Role):
+def get_user_with_roles(*roles: Role):
     roles_str = ", ".join([role.value for role in roles])
 
     async def get_current_user_with_role(

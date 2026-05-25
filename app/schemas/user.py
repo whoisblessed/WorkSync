@@ -1,32 +1,55 @@
-from enum import Enum
-from pydantic import BaseModel, ConfigDict, EmailStr
+from typing import Annotated
+
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
+
+from app.models.user import Role
 
 
-class Role(str, Enum):
-    manager = "manager"
-    hr = "HR"
-    employee = "employee"
+# Создание
 
 
-class EmployeeResponse(BaseModel):
-    id: int
-    first_name: str
-    last_name: str
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class UserBase(BaseModel):
-    email: EmailStr
-    role: Role
-
-
-class UserCreate(UserBase):
-    password: str
+class UserCreate(BaseModel):
+    email: Annotated[
+        EmailStr,
+        Field(
+            max_length=255,
+            description="Электронная почта пользователя, до 255 символов",
+        ),
+    ]
+    password: Annotated[
+        str, Field(max_length=255, description="Пароль, до 255 символов")
+    ]
 
 
-class UserResponse(UserBase):
-    id: int
-    employee: EmployeeResponse | None = None
+class UserFullCreate(UserCreate):
+    role: Annotated[
+        Role, Field(description="Роль пользователя: manager, HR или employee")
+    ]
+
+
+# Обновление
+
+
+class UserUpdate(BaseModel):
+    email: Annotated[
+        EmailStr | None,
+        Field(
+            max_length=255,
+            description="Электронная почта пользователя, до 255 символов",
+        ),
+    ]
+    role: Annotated[
+        Role | None, Field(description="Роль пользователя: manager, HR или employee")
+    ]
+
+
+# Ответ
+
+
+class User(BaseModel):
+    id: Annotated[int, Field(description="Уникальный индентификатор пользователя")]
+    email: Annotated[str, Field(description="Электронная почта пользователя")]
+    role: Annotated[Role, Field(description="Роль пользователя")]
+    is_active: Annotated[bool, Field(description="Активность пользователя")]
 
     model_config = ConfigDict(from_attributes=True)

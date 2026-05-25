@@ -8,11 +8,11 @@ from .user import User
 
 
 __all__ = [
+    "User",
     "Employee",
+    "Team",
+    "Schedule",
     "EmployeeEvent",
     "Event",
     "ScheduleException",
-    "Schedule",
-    "Team",
-    "User",
 ]
