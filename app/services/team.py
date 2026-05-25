@@ -64,7 +64,7 @@ class TeamService:
             raise ForbiddenException(
                 "Руководитель может создавать команды только для себя"
             )
-        
+
         if db_manager.role != Role.manager:
             raise BadRequestException(
                 f"Пользователь с ID {team.manager_id} не руководитель"

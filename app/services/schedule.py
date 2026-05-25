@@ -48,10 +48,10 @@ class ScheduleService:
         if db_schedule is None:
             raise NotFoundException(f"График с ID {id} не найден или неактивен")
 
-        if current_user.role == Role.manager:
-            await self.employee_service.get_by_id(
-                db_schedule.employee_id, current_user
-            )  # Проверка принадлежности графика сотруднику из команды руководителя
+        # Проверка принадлежности графика сотруднику из команды руководителя
+        # или личных данных сотруднику
+        if current_user.role in (Role.manager, Role.employee):
+            await self.employee_service.get_by_id(db_schedule.employee_id, current_user)
 
         return db_schedule
 
@@ -63,7 +63,7 @@ class ScheduleService:
                 f"График сотрудника с ID {id} не найден или неактивен"
             )
 
-        if current_user.role == Role.manager:
+        if current_user.role in (Role.manager, Role.employee):
             await self.employee_service.get_by_id(id, current_user)
 
         return db_schedule
@@ -75,17 +75,10 @@ class ScheduleService:
             schedule.employee_id, current_user
         )  # Проверка существования данных сотрудника + принадлежности сотрудника команде руководителя
 
-        if current_user.role == Role.employee:
-            current_employee = await self.employee_service.get_by_user(current_user)
-
-            if current_employee.id != schedule.employee_id:
-                raise ForbiddenException(
-                    f"Сотрудник может создать график только для себя"
-                )
-
         db_user = await self.user_service.get_by_id(
             db_employee.user_id
-        )  # Получение пользователя для првоерки его роли
+        )  # Получение пользователя для проверки его роли
+
         if db_user.role != Role.employee:
             raise BadRequestException(
                 f"Сотрудник с id {schedule.employee_id} не имеет соответсвующей роли"
@@ -101,4 +94,10 @@ class ScheduleService:
     async def update(
         self, id: int, schedule: ScheduleUpdate, current_user: User
     ) -> Schedule:
-        db_schedule = await self.get_by_id(id, current_user)  # Проверка существования схемы и принадлежности ее к руководителю
+        db_schedule = await self.get_by_id(
+            id, current_user
+        )  # Проверка существования схемы и принадлежности его к руководителю или сотруднкиу
+
+        return await self.schedule_repository.update(
+            db_schedule, **schedule.model_dump()
+        )
