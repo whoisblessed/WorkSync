@@ -15,6 +15,7 @@ from app.repositories import (
     TeamRepository,
     EmployeeRepository,
     ScheduleRepository,
+    ScheduleExceptionRepository,
 )
 from app.services import (
     AuthService,
@@ -22,6 +23,7 @@ from app.services import (
     TeamService,
     EmployeeService,
     ScheduleService,
+    ScheduleExceptionService,
 )
 
 
@@ -46,6 +48,12 @@ def get_employee_repository(session: DBSession) -> EmployeeRepository:
 
 def get_schedule_repository(session: DBSession) -> ScheduleRepository:
     return ScheduleRepository(session)
+
+
+def get_schedule_exception_repository(
+    session: DBSession,
+) -> ScheduleExceptionRepository:
+    return ScheduleExceptionRepository(session)
 
 
 # Сервисы
@@ -89,7 +97,16 @@ def get_schedule_service(
     return ScheduleService(schedule_repository, employee_service)
 
 
-# Аутентификация
+def get_schedule_exception_service(
+    schedule_exception_repository: Annotated[
+        ScheduleExceptionRepository, Depends(get_schedule_exception_repository)
+    ],
+    employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
+) -> ScheduleExceptionService:
+    return ScheduleExceptionService(
+        schedule_exception_repository, employee_service, user_service
+    )
 
 
 async def get_current_user(

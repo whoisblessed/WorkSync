@@ -4,7 +4,7 @@ from app.models import User, Team, Employee, ScheduleException
 from app.repositories.base import BaseRepository
 
 
-class ScheduleExceptionRepository(BaseRepository):
+class ScheduleExceptionRepository(BaseRepository[ScheduleException]):
     model = ScheduleException
 
     async def get_all_by_user_id(self, id: int) -> list[ScheduleException]:

@@ -3,6 +3,7 @@ from .user import UserService
 from .team import TeamService
 from .employee import EmployeeService
 from .schedule import ScheduleService
+from .schedule_exception import ScheduleExceptionService
 
 
 __all__ = [
@@ -11,4 +12,5 @@ __all__ = [
     "TeamService",
     "EmployeeService",
     "ScheduleService",
+    "ScheduleExceptionService",
 ]
