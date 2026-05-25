@@ -17,7 +17,7 @@ from app.schemas.schedule_exception import (
 from app.services import ScheduleExceptionService
 
 
-router = APIRouter(prefix="/schedule_exceptions", tags="schedule_exceptions")
+router = APIRouter(prefix="/schedule_exceptions", tags=["schedule_exceptions"])
 
 
 @router.get("/", response_model=list[ScheduleExceptionSchema])

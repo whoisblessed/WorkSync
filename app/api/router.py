@@ -6,6 +6,7 @@ from app.api.endpoints import (
     team_router,
     employee_router,
     schedule_router,
+    schedule_exception_router
 )
 
 
@@ -16,3 +17,4 @@ api_router.include_router(user_router)
 api_router.include_router(team_router)
 api_router.include_router(employee_router)
 api_router.include_router(schedule_router)
+api_router.include_router(schedule_exception_router)
