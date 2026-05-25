@@ -3,7 +3,7 @@ from .user import UserRepository
 from .team import TeamRepository
 from .employee import EmployeeRepository
 from .sсhedule import ScheduleRepository
-
+from .events import EventRepository
 
 __all__ = [
     "BaseRepository",
@@ -11,4 +11,7 @@ __all__ = [
     "TeamRepository",
     "EmployeeRepository",
     "ScheduleRepository",
+    "EventRepository"
 ]
+
+
