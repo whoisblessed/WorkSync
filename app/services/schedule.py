@@ -28,15 +28,16 @@ class ScheduleService:
 
         return await self.schedule_repository.get_all()
 
-    async def get_by_user(self, current_user: User) -> Schedule:
-        db_schedule = await self.schedule_repository.get_by_user_id(current_user.id)
-
+    async def get_by_user_id(self, user_id: int) -> Schedule:
+        db_schedule = await self.schedule_repository.get_by_user_id(user_id)
         if db_schedule is None:
             raise NotFoundException(
-                f"График пользователя с id {current_user.id} не найден или неактивен"
+                f"График пользователя с id {user_id} не найден или неактивен"
             )
-
         return db_schedule
+
+    async def get_by_user(self, current_user: User) -> Schedule:
+        return await self.get_by_user_id(current_user.id)
 
     async def get_by_id(self, id: int, current_user: User) -> Schedule:
         db_schedule = await self.schedule_repository.get_by_id(id)

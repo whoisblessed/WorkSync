@@ -31,10 +31,11 @@ class ScheduleExceptionService:
 
         return await self.schedule_exception_repository.get_all()
 
-    async def get_by_user(self, current_user: User) -> list[ScheduleException]:
-        return await self.schedule_exception_repository.get_all_by_user_id(
-            current_user.id
-        )
+    async def get_all_by_user_id(self, user_id: int) -> list[ScheduleException]:
+        return await self.schedule_exception_repository.get_all_by_user_id(user_id)
+
+    async def get_all_by_user(self, current_user: User) -> list[ScheduleException]:
+        return await self.get_all_by_user_id(current_user.id)
 
     async def get_by_id(self, id: int, current_user: User) -> ScheduleException:
         db_schedule_exception = await self.schedule_exception_repository.get_by_id(id)

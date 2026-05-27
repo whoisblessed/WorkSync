@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from app.models import Team, Employee, Event
+from app.models import Team, Employee, Event, EmployeeEvent
 from app.repositories import BaseRepository
 
 
@@ -19,4 +19,10 @@ class EmployeeRepository(BaseRepository[Employee]):
         return employees.all()
 
     async def get_all_by_event_id(self, id: int) -> list[Employee]:
-        db_employees = self.session.scalars(select())
+        db_employees = await self.session.scalars(
+            select(Employee)
+            .join(EmployeeEvent)
+            .join(Event)
+            .where(Event.id == id, Employee.is_active)
+        )
+        return db_employees.all()

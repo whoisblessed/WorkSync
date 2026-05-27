@@ -27,6 +27,7 @@ from app.services import (
     ScheduleService,
     ScheduleExceptionService,
     EventService,
+    ProfileService,
 )
 
 
@@ -128,6 +129,29 @@ def get_event_service(
     employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
 ) -> EventService:
     return EventService(event_repository, employee_event_repository, employee_service)
+
+
+def get_profile_service(
+    user_service: Annotated[UserService, Depends(get_user_service)],
+    employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
+    team_service: Annotated[TeamService, Depends(get_team_service)],
+    schedule_service: Annotated[ScheduleService, Depends(get_schedule_service)],
+    schedule_exception_service: Annotated[
+        ScheduleExceptionService, Depends(get_schedule_exception_service)
+    ],
+    event_service: Annotated[EventService, Depends(get_event_service)],
+) -> ProfileService:
+    return ProfileService(
+        user_service,
+        employee_service,
+        team_service,
+        schedule_service,
+        schedule_exception_service,
+        event_service,
+    )
+
+
+# Аутентификация
 
 
 async def get_current_user(

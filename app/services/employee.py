@@ -32,15 +32,18 @@ class EmployeeService:
 
         return await self.employee_repository.get_all()
 
-    async def get_by_user(self, current_user: User) -> Employee:
-        db_employee = await self.employee_repository.get_by_user_id(current_user.id)
+    async def get_by_user_id(self, user_id: int) -> Employee:
+        db_employee = await self.employee_repository.get_by_user_id(user_id)
 
         if db_employee is None:
             raise NotFoundException(
-                f"Сотрудник пользователя с id {current_user.id} не найден или неактивен"
+                f"Сотрудник пользователя с id {user_id} не найден или неактивен"
             )
 
         return db_employee
+
+    async def get_by_user(self, current_user: User) -> Employee:
+        return await self.get_by_user_id(current_user.id)
 
     async def get_by_id(self, id: int, current_user: User) -> Employee:
         db_employee = await self.employee_repository.get_by_id(id)
@@ -62,7 +65,26 @@ class EmployeeService:
         return db_employee
 
     async def get_all_by_event_id(self, id: int, current_user: User) -> list[Employee]:
-        pass
+        db_employees = await self.employee_repository.get_all_by_event_id(id)
+
+        if current_user.role == Role.manager:
+            manager_teams = await self.team_service.get_all(current_user)
+            team_ids = {team.id for team in manager_teams}
+            return [e for e in db_employees if e.team_id in team_ids]
+
+        if current_user.role == Role.employee:
+            cur_employee = await self.get_by_user(current_user)
+            if not any(e.id == cur_employee.id for e in db_employees):
+                raise NotFoundException(
+                    f"Сотруднику с ID {cur_employee.id} не было поставлено событие с ID {id}"
+                )
+            return [
+                employee
+                for employee in db_employees
+                if employee.team_id == cur_employee.team_id
+            ]
+
+        return db_employees
 
     # Изменение
 

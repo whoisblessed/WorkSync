@@ -22,3 +22,12 @@ class EmployeeEventRepository:
             )
         )
         await self.session.flush()
+
+    async def exists(self, employee_id: int, event_id: int) -> bool:
+        result = await self.session.scalar(
+            select(EmployeeEvent).where(
+                EmployeeEvent.employee_id == employee_id,
+                EmployeeEvent.event_id == event_id,
+            )
+        )
+        return result is not None

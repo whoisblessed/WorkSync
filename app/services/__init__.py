@@ -5,6 +5,7 @@ from .employee import EmployeeService
 from .schedule import ScheduleService
 from .schedule_exception import ScheduleExceptionService
 from .event import EventService
+from .profile import ProfileService
 
 __all__ = [
     "AuthService",
@@ -13,5 +14,7 @@ __all__ = [
     "EmployeeService",
     "ScheduleService",
     "ScheduleExceptionService",
+    "EventServiceProfileService",
     "EventService",
+    "ProfileService",
 ]

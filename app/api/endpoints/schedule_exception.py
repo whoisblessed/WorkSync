@@ -7,7 +7,6 @@ from app.api.dependencies import (
     get_schedule_exception_service,
 )
 from app.models import User as UserModel
-from app.models.user import Role
 from app.schemas.schedule_exception import (
     ScheduleException as ScheduleExceptionSchema,
     ScheduleExceptionCreate as ScheduleExceptionCreateSchema,
@@ -44,7 +43,7 @@ async def get_all_my(
     """
     Получение своих временных исключений.
     """
-    return await schedule_exception_service.get_by_user(current_user)
+    return await schedule_exception_service.get_all_by_user(current_user)
 
 
 @router.get("/{id}", response_model=ScheduleExceptionSchema)
