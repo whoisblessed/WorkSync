@@ -14,7 +14,7 @@ class EmployeeBase(BaseModel):
         str, Field(max_length=255, description="Фамилия сотрудника, до 255 символов")
     ]
     team_id: Annotated[
-        int, Field(description="ID команды, в которой состоит сотрудник")
+        int | None, Field(description="ID команды, в которой состоит сотрудник")
     ]
 
 
@@ -46,7 +46,7 @@ class Employee(BaseModel):
         int, Field(description="ID пользователя, на которого зарегистрирован профиль")
     ]
     team_id: Annotated[
-        int, Field(description="ID команды, в которой состоит сотрудник")
+        int | None, Field(description="ID команды, в которой состоит сотрудник")
     ]
 
     model_config = ConfigDict(from_attributes=True)

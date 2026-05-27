@@ -22,7 +22,7 @@ class Employee(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
-    team_id: Mapped[int] = mapped_column(ForeignKey("teams.id"))
+    team_id: Mapped[int | None] = mapped_column(ForeignKey("teams.id"))
 
     user: Mapped[User] = relationship(back_populates="employee")
     team: Mapped[Team] = relationship(back_populates="employees")
