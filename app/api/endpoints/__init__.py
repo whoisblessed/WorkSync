@@ -11,5 +11,5 @@ __all__ = [
     "team_router",
     "employee_router",
     "schedule_router",
-    "schedule_exception_router"
+    "schedule_exception_router",
 ]

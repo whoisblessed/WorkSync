@@ -1,8 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
 from app.core.exceptions import (
-    BadRequestException,
-    ForbiddenException,
     NotFoundException,
     ConflictException,
 )
@@ -10,18 +8,16 @@ from app.models import User, Schedule
 from app.models.user import Role
 from app.schemas.schedule import ScheduleCreate, ScheduleUpdate
 from app.repositories import ScheduleRepository
-from app.services import UserService, EmployeeService
+from app.services import EmployeeService
 
 
 class ScheduleService:
     def __init__(
         self,
         schedule_repository: ScheduleRepository,
-        user_service: UserService,
         employee_service: EmployeeService,
     ) -> None:
         self.schedule_repository = schedule_repository
-        self.user_service = user_service
         self.employee_service = employee_service
 
     # Получние
@@ -71,18 +67,9 @@ class ScheduleService:
     # Изменение
 
     async def create(self, schedule: ScheduleCreate, current_user: User) -> Schedule:
-        db_employee = await self.employee_service.get_by_id(
+        await self.employee_service.get_by_id(
             schedule.employee_id, current_user
         )  # Проверка существования данных сотрудника + принадлежности сотрудника команде руководителя
-
-        db_user = await self.user_service.get_by_id(
-            db_employee.user_id
-        )  # Получение пользователя для проверки его роли
-
-        if db_user.role != Role.employee:
-            raise BadRequestException(
-                f"Сотрудник с id {schedule.employee_id} не имеет соответсвующей роли"
-            )
 
         try:
             return await self.schedule_repository.create(**schedule.model_dump())

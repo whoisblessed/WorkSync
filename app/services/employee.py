@@ -61,6 +61,9 @@ class EmployeeService:
 
         return db_employee
 
+    async def get_all_by_event_id(self, id: int, current_user: User) -> list[Employee]:
+        pass
+
     # Изменение
 
     async def create(self, employee: EmployeeCreate, current_user: User) -> Employee:
@@ -69,10 +72,10 @@ class EmployeeService:
         )  # Проверка существования пользователя из схемы
 
         if db_user.role != Role.employee and employee.team_id is not None:
-            raise BadRequestException(f"Руководители и HR не могут иметь команды")
+            raise BadRequestException("Руководители и HR не могут иметь команды")
 
         if db_user.role == Role.employee and employee.team_id is None:
-            raise BadRequestException(f"Сотрудники обязаны иметь команду")
+            raise BadRequestException("Сотрудники обязаны иметь команду")
 
         if employee.team_id is not None:
             await self.team_service.get_by_id(
@@ -95,10 +98,10 @@ class EmployeeService:
         db_user = await self.user_service.get_by_id(db_employee.user_id)
 
         if db_user.role != Role.employee and employee.team_id is not None:
-            raise BadRequestException(f"Руководители и HR не могут иметь команды")
+            raise BadRequestException("Руководители и HR не могут иметь команды")
 
         if db_user.role == Role.employee and employee.team_id is None:
-            raise BadRequestException(f"Сотрудники обязаны иметь команду")
+            raise BadRequestException("Сотрудники обязаны иметь команду")
 
         if employee.team_id is not None:
             await self.team_service.get_by_id(

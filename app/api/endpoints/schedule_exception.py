@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies import (
     get_current_user,
-    get_user_with_roles,
     get_schedule_exception_service,
 )
 from app.models import User as UserModel
@@ -22,9 +21,7 @@ router = APIRouter(prefix="/schedule_exceptions", tags=["schedule_exceptions"])
 
 @router.get("/", response_model=list[ScheduleExceptionSchema])
 async def get_all_schedule_exceptions(
-    current_user: Annotated[
-        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
-    ],
+    current_user: Annotated[UserModel, Depends(get_current_user)],
     schedule_exception_service: Annotated[
         ScheduleExceptionService, Depends(get_schedule_exception_service)
     ],
@@ -37,12 +34,23 @@ async def get_all_schedule_exceptions(
     return await schedule_exception_service.get_all(current_user)
 
 
+@router.get("/me", response_model=ScheduleExceptionSchema)
+async def get_all_my(
+    current_user: Annotated[UserModel, Depends(get_current_user)],
+    schedule_exception_service: Annotated[
+        ScheduleExceptionService, Depends(get_schedule_exception_service)
+    ],
+) -> ScheduleExceptionSchema:
+    """
+    Получение своих временных исключений.
+    """
+    return await schedule_exception_service.get_by_user(current_user)
+
+
 @router.get("/{id}", response_model=ScheduleExceptionSchema)
 async def get_schedule_exception_by_id(
     id: int,
-    current_user: Annotated[
-        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
-    ],
+    current_user: Annotated[UserModel, Depends(get_current_user)],
     schedule_exception_service: Annotated[
         ScheduleExceptionService, Depends(get_schedule_exception_service)
     ],
@@ -60,9 +68,7 @@ async def get_schedule_exception_by_id(
 )
 async def create_schedule_exception(
     schedule_exception: ScheduleExceptionCreateSchema,
-    current_user: Annotated[
-        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
-    ],
+    current_user: Annotated[UserModel, Depends(get_current_user)],
     schedule_exception_service: Annotated[
         ScheduleExceptionService, Depends(get_schedule_exception_service)
     ],
@@ -70,18 +76,16 @@ async def create_schedule_exception(
     """
     Создание временного исключения для любой роли.
     "hr" может создать для всех, "manager" только для сотрудника в его командах
-    "employee" только свои.
+    "employee" только для себя.
     """
     return await schedule_exception_service.create(schedule_exception, current_user)
 
 
-@router.put("/", response_model=ScheduleExceptionSchema)
+@router.put("/{id}", response_model=ScheduleExceptionSchema)
 async def update_schedule_exception(
     id: int,
     schedule_exception: ScheduleExceptionUpdateSchema,
-    current_user: Annotated[
-        UserModel, Depends(get_user_with_roles(Role.manager, Role.hr))
-    ],
+    current_user: Annotated[UserModel, Depends(get_current_user)],
     schedule_exception_service: Annotated[
         ScheduleExceptionService, Depends(get_schedule_exception_service)
     ],
@@ -89,6 +93,6 @@ async def update_schedule_exception(
     """
     Оьновление временного исключения по id для любой роли.
     "hr" может обновлять для всех, "manager" только для сотрудника в его командах
-    "employee" только свои.
+    "employee" только для себя.
     """
     return await schedule_exception_service.update(id, schedule_exception, current_user)

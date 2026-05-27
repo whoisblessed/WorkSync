@@ -74,8 +74,9 @@ async def create_schedule(
     return await schedule_service.create(schedule, current_user)
 
 
-@router.put("/", response_model=ScheduleSchema)
+@router.put("/{id}", response_model=ScheduleSchema)
 async def update_schedule(
+    id: int,
     schedule: ScheduleUpdateSchema,
     current_user: Annotated[UserModel, Depends(get_current_user)],
     schedule_service: Annotated[ScheduleService, Depends(get_schedule_service)],
