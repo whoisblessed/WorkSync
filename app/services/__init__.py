@@ -4,6 +4,7 @@ from .team import TeamService
 from .employee import EmployeeService
 from .schedule import ScheduleService
 from .schedule_exception import ScheduleExceptionService
+from .events import EventRepository
 
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "EmployeeService",
     "ScheduleService",
     "ScheduleExceptionService",
+    "EventRepository"
 ]

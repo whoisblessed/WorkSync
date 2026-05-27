@@ -4,6 +4,8 @@ from .team import router as team_router
 from .employee import router as employee_router
 from .schedule import router as schedule_router
 from .schedule_exception import router as schedule_exception_router
+from .events import router as event_router
+
 
 __all__ = [
     "auth_router",
@@ -11,5 +13,6 @@ __all__ = [
     "team_router",
     "employee_router",
     "schedule_router",
-    "schedule_exception_router"
+    "schedule_exception_router",
+    "event_router"
 ]

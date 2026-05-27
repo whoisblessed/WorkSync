@@ -1,80 +1,73 @@
-from typing import Annotated
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 from app.models.event import EventType
 
 
+# Создание
+
 
 class EventCreate(BaseModel):
-    type: Annotated[
-        EventType,
-        Field(description="Тип события"), #'задача' или 'встреча'
-    ]
-    title: Annotated[
-        str,
-        Field(max_length=150, description="Название события"),
-    ]
+    type: Annotated[EventType, Field(description="Тип события: task или meeting")]
+    title: Annotated[str, Field(max_length=150, description="Название события")]
     description: Annotated[
-        str,
-        Field(max_length=500, description="Описание события"),
+        str, Field(max_length=500, description="Описание события")
     ]
-    start_at: Annotated[
-        datetime,
-        Field(description="Время начала события"), # (ISO формат с часовым поясом)
-    ]
-    end_at: Annotated[
-        datetime,
-        Field(description="Время окончания события"), # (ISO формат с часовым поясом)
-    ]
+    start_at: Annotated[datetime, Field(description="Дата и время начала события")]
+    end_at: Annotated[datetime, Field(description="Дата и время конца события")]
     employee_ids: Annotated[
-        list[int],
-        Field(
-            description="Список ID сотрудников, участвующих в событии",
-            min_length=1,
-        ),
+        list[int], Field(min_length=1, description="Список ID сотрудников")
     ]
+
+    @model_validator(mode="after")
+    def validate_dates(self) -> "EventCreate":
+        if self.end_at <= self.start_at:
+            raise ValueError("Дата конца события должна быть позже даты начала")
+        return self
+
+
+# Обновление
 
 
 class EventUpdate(BaseModel):
-    type: Annotated[
-        EventType | None,
-        Field(default=None, description="Тип события"), # 'задача' или 'встреча'
-    ] = None
-    title: Annotated[
-        str | None,
-        Field(default=None, max_length=150, description="Название события"),
-    ] = None
+    type: Annotated[EventType, Field(description="Тип события: task или meeting")]
+    title: Annotated[str, Field(max_length=150, description="Название события")]
     description: Annotated[
-        str | None,
-        Field(default=None, max_length=500, description="Описание события"),
-    ] = None
-    start_at: Annotated[
-        datetime | None,
-        Field(default=None, description="Время начала события"), # (ISO формат с часовым поясом)
-    ] = None
-    end_at: Annotated[
-        datetime | None,
-        Field(default=None, description="Время окончания события"), # (ISO формат с часовым поясом)
-    ] = None
-    employee_ids: Annotated[
-        list[int] | None,
-        Field(default=None, description="Список ID сотрудников", min_length=1),
-    ] = None
+        str, Field(max_length=500, description="Описание события")
+    ]
+    start_at: Annotated[datetime, Field(description="Дата и время начала события")]
+    end_at: Annotated[datetime, Field(description="Дата и время конца события")]
 
+    @model_validator(mode="after")
+    def validate_dates(self) -> "EventUpdate":
+        if self.end_at <= self.start_at:
+            raise ValueError("Дата конца события должна быть позже даты начала")
+        return self
+
+
+# Ответ
+
+
+class EventEmployee(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Event(BaseModel):
-    id: Annotated[int, Field(description="id события")]
+    id: Annotated[int, Field(description="Уникальный идентификатор события")]
     type: Annotated[EventType, Field(description="Тип события")]
     title: Annotated[str, Field(description="Название события")]
     description: Annotated[str, Field(description="Описание события")]
-    start_at: Annotated[datetime, Field(description="Время начала события")]
-    end_at: Annotated[datetime, Field(description="Время окончания события")]
+    start_at: Annotated[datetime, Field(description="Дата и время начала")]
+    end_at: Annotated[datetime, Field(description="Дата и время конца")]
     is_active: Annotated[bool, Field(description="Активность события")]
-    employee_ids: Annotated[
-        list[int], Field(description="ID сотрудников-участников")
+    employees: Annotated[
+        list[EventEmployee], Field(description="Список участников события")
     ]
 
     model_config = ConfigDict(from_attributes=True)

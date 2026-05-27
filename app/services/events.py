@@ -1,121 +1,143 @@
-from app.core.exceptions import BadRequestException, NotFoundException
-from app.models import Event as EventModel
-from app.repositories import EventRepository, EmployeeRepository
-from app.schemas.events import EventCreate, EventUpdate, Event as EventSchema
+from app.core.exceptions import ForbiddenException, NotFoundException
+from app.models import User, Event, Employee
+from app.models.user import Role
+from app.repositories.events import EventRepository
+from app.services.employee import EmployeeService
+from app.schemas.events import EventCreate, EventUpdate
 
 
 class EventService:
-
     def __init__(
-            self,
-            event_repository: EventRepository,
-            employee_repository: EmployeeRepository,
-    ):
+        self,
+        event_repository: EventRepository,
+        employee_service: EmployeeService,
+    ) -> None:
         self.event_repository = event_repository
-        self.employee_repository = employee_repository
+        self.employee_service = employee_service
 
-    """Получить все активные события"""
-    async def get_all(self) -> list[EventSchema]:
-        events = await self.event_repository.get_all()
-        return [self._to_schema(event) for event in events]
 
-    """Получить событие по ID"""
-    async def get_by_id(self, event_id: int) -> EventSchema:
-        event = await self.event_repository.get_by_id(event_id)
-        if not event:
-            raise NotFoundException(f"Событие с ID {event_id} не найдено")
-        return self._to_schema(event)
 
-    """Получить все события сотрудника"""
-    async def get_by_employee_id(self, employee_id: int) -> list[EventSchema]:
-        # Проверяем существование сотрудника
-        employee = await self.employee_repository.get_by_id(employee_id)
-        if not employee:
-            raise NotFoundException(f"Сотрудник с ID {employee_id} не найден")
+    async def _resolve_employees(
+        self, employee_ids: list[int], current_user: User
+    ) -> list[Employee]:
+        """
+        Возвращает список Employee по переданным ID.
+        Для manager — проверяет, что каждый сотрудник из его команды.
+        Для hr   — разрешает любых сотрудников.
+        """
+        employees: list[Employee] = []
+        for emp_id in employee_ids:
+            # get_by_id уже содержит проверку принадлежности команде для manager
+            db_employee = await self.employee_service.get_by_id(emp_id, current_user)
+            employees.append(db_employee)
+        return employees
 
-        events = await self.event_repository.get_by_employee_id(employee_id)
-        return [self._to_schema(event) for event in events]
+    async def _get_event_or_403(self, event_id: int, current_user: User) -> Event:
+        """
+        Получает событие и проверяет доступ:
+          - hr   — доступно любое событие
+          - manager — только если хотя бы один участник из его команды
+          - employee — только если он сам участник
+        """
+        db_event = await self.event_repository.get_by_id(event_id)
+        if db_event is None:
+            raise NotFoundException(f"Событие с id {event_id} не найдено или неактивно")
 
-    """Создать новое событие"""
-    async def create(self, data: EventCreate) -> EventSchema:
-        """Создать новое событие"""
-        # Валидация времени
-        if data.end_at <= data.start_at:
-            raise BadRequestException(
-                "Время окончания должно быть позже времени начала"
-            )
+        if current_user.role == Role.hr:
+            return db_event
 
-        # Проверка существования сотрудников
-        all_employees = await self.employee_repository.get_all()
-        existing_ids = {emp.id for emp in all_employees}
+        participant_ids = {emp.id for emp in db_event.employees}
 
-        if not set(data.employee_ids).issubset(existing_ids):
-            missing_ids = set(data.employee_ids) - existing_ids
-            raise NotFoundException(
-                f"Сотрудники с ID {missing_ids} не найдены"
-            )
-
-        # Создание события
-        event_data = data.dict(exclude={'employee_ids'})
-        event = await self.event_repository.create(event_data)
-
-        # Добавление участников
-        await self.event_repository.update_employees(event.id, data.employee_ids)
-
-        # Получение обновленного события
-        updated_event = await self.event_repository.get_by_id(event.id)
-        return self._to_schema(updated_event)
-
-    async def update(self, event_id: int, data: EventUpdate) -> EventSchema:
-        """Обновить событие"""
-        # Проверка существования
-        event = await self.event_repository.get_by_id(event_id)
-        if not event:
-            raise NotFoundException(f"Событие с ID {event_id} не найдено")
-
-        # Валидация времени
-        final_start = data.start_at if data.start_at is not None else event.start_at
-        final_end = data.end_at if data.end_at is not None else event.end_at
-
-        if final_end <= final_start:
-            raise BadRequestException(
-                "Время окончания должно быть позже времени начала"
-            )
-
-        # Обновление основных полей
-        update_data = data.dict(exclude_unset=True, exclude={'employee_ids'})
-        event = await self.event_repository.update(event_id, update_data)
-
-        # Обновление участников
-        if data.employee_ids is not None:
-            all_employees = await self.employee_repository.get_all()
-            existing_ids = {emp.id for emp in all_employees}
-
-            if not set(data.employee_ids).issubset(existing_ids):
-                missing_ids = set(data.employee_ids) - existing_ids
-                raise NotFoundException(
-                    f"Сотрудники с ID {missing_ids} не найдены"
+        if current_user.role == Role.manager:
+            # Проверяем, что хотя бы один участник — из команды менеджера
+            team_employee_ids = {
+                emp.id
+                for emp in await self.employee_service.employee_repository.get_all_by_manager_id(
+                    current_user.id
                 )
+            }
+            if not participant_ids & team_employee_ids:
+                raise ForbiddenException(
+                    "У вас нет доступа к этому событию: ни один участник не входит в вашу команду"
+                )
+            return db_event
 
-            await self.event_repository.update_employees(
-                event_id, data.employee_ids
+        # employee
+        my_employee = await self.employee_service.employee_repository.get_by_user_id(
+            current_user.id
+        )
+        if my_employee is None or my_employee.id not in participant_ids:
+            raise ForbiddenException("Вы не являетесь участником этого события")
+
+        return db_event
+
+
+    async def get_all(self, current_user: User) -> list[Event]:
+        if current_user.role == Role.hr:
+            return await self.event_repository.get_all()
+
+        if current_user.role == Role.manager:
+            return await self.event_repository.get_all_by_manager_id(current_user.id)
+
+        # employee — только свои
+        my_employee = await self.employee_service.employee_repository.get_by_user_id(
+            current_user.id
+        )
+        if my_employee is None:
+            return []
+        return await self.event_repository.get_all_by_employee_id(my_employee.id)
+
+    async def get_by_id(self, event_id: int, current_user: User) -> Event:
+        return await self._get_event_or_403(event_id, current_user)
+
+
+    async def create(self, data: EventCreate, current_user: User) -> Event:
+        employees = await self._resolve_employees(data.employee_ids, current_user)
+
+        return await self.event_repository.create_with_employees(
+            employees=employees,
+            type=data.type,
+            title=data.title,
+            description=data.description,
+            start_at=data.start_at,
+            end_at=data.end_at,
+        )
+
+    async def update(
+        self, event_id: int, data: EventUpdate, current_user: User
+    ) -> Event:
+        db_event = await self._get_event_or_403(event_id, current_user)
+
+        return await self.event_repository.update(
+            db_event,
+            type=data.type,
+            title=data.title,
+            description=data.description,
+            start_at=data.start_at,
+            end_at=data.end_at,
+        )
+
+    async def deactivate(self, event_id: int, current_user: User) -> None:
+        db_event = await self._get_event_or_403(event_id, current_user)
+        await self.event_repository.deactivate(db_event)
+
+    async def activate(self, event_id: int, current_user: User) -> None:
+        db_event = await self.event_repository.get_inactive_by_id(event_id)
+        if db_event is None:
+            raise NotFoundException(
+                f"Неактивное событие с id {event_id} не найдено"
             )
-
-        # Получение обновленного события
-        updated_event = await self.event_repository.get_by_id(event_id)
-        return self._to_schema(updated_event)
-
-    async def delete(self, event_id: int) -> None:
-        """Деактивировать событие (soft delete)"""
-        event = await self.event_repository.get_by_id(event_id)
-        if not event:
-            raise NotFoundException(f"Событие с ID {event_id} не найдено")
-
-        await self.event_repository.deactivate(event_id)
-
-    def _to_schema(self, event: EventModel) -> EventSchema:
-        """Конвертировать SQLAlchemy модель в Pydantic схему"""
-        employee_ids = [emp.id for emp in event.employees]
-        event_schema = EventSchema.model_validate(event)
-        event_schema.employee_ids = employee_ids
-        return event_schema
+        # Для activate тоже проверяем доступ через участников (загружены при get_inactive_by_id)
+        if current_user.role == Role.manager:
+            participant_ids = {emp.id for emp in db_event.employees}
+            team_employee_ids = {
+                emp.id
+                for emp in await self.employee_service.employee_repository.get_all_by_manager_id(
+                    current_user.id
+                )
+            }
+            if not participant_ids & team_employee_ids:
+                raise ForbiddenException(
+                    "У вас нет доступа к этому событию"
+                )
+        await self.event_repository.activate(db_event)

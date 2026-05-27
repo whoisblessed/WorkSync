@@ -16,6 +16,7 @@ from app.repositories import (
     EmployeeRepository,
     ScheduleRepository,
     ScheduleExceptionRepository,
+    EventRepository,
 )
 from app.services import (
     AuthService,
@@ -24,6 +25,7 @@ from app.services import (
     EmployeeService,
     ScheduleService,
     ScheduleExceptionService,
+    EventService,
 )
 
 
@@ -107,6 +109,17 @@ def get_schedule_exception_service(
     return ScheduleExceptionService(
         schedule_exception_repository, employee_service, user_service
     )
+
+
+def get_event_repository(session: DBSession) -> EventRepository:
+    return EventRepository(session)
+
+
+def get_event_service(
+    event_repository: Annotated[EventRepository, Depends(get_event_repository)],
+    employee_service: Annotated[EmployeeService, Depends(get_employee_service)],
+) -> EventService:
+    return EventService(event_repository, employee_service)
 
 
 async def get_current_user(
