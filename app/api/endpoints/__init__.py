@@ -7,6 +7,7 @@ from .schedule_exception import router as schedule_exception_router
 from .event import router as event_router
 from .profile import router as profile_router
 from .availability_map import router as availability_map_router
+from .ai_assistant import router as ai_assistant_router
 
 __all__ = [
     "auth_router",
@@ -18,4 +19,5 @@ __all__ = [
     "event_router",
     "profile_router",
     "availability_map_router",
+    "ai_assistant_router",
 ]

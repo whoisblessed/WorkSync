@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     app: AppSettings
     database: DatabaseSettings
     jwt: JWTSettings
+    deepseek_api_key: str = ""
 
     model_config = ConfigDict(env_file=".env", env_nested_delimiter="__")
 

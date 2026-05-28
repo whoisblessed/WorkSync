@@ -23,7 +23,6 @@ W4_TIMEZONE: float = 0.15
 W5_HR_MISMATCH: float = 0.15
 
 
-
 @dataclass
 class EmployeeRiskMetrics:
     employee_id: int
@@ -68,7 +67,6 @@ class TeamRiskSummary:
     overloaded_count: int
     tz_conflict_count: int
     high_risk_count: int
-
 
 
 def _make_aware(dt: datetime) -> datetime:
@@ -152,7 +150,8 @@ def _detect_timezone_conflict(
         tz = timezone.utc
 
     late_count = sum(
-        1 for ev in events
+        1
+        for ev in events
         if _make_aware(ev.start_at).astimezone(tz).hour >= LATE_HOUR_THRESHOLD
     )
 
@@ -219,9 +218,7 @@ def _build_recommendations(metrics: EmployeeRiskMetrics) -> list[str]:
         )
 
     if metrics.timezone_conflict > 0:
-        recs.append(
-            f"Предложить обновить часовой пояс. {metrics.timezone_note}"
-        )
+        recs.append(f"Предложить обновить часовой пояс. {metrics.timezone_note}")
 
     if metrics.hr_calendar_mismatch > 0.2:
         recs.append(
@@ -238,9 +235,7 @@ def _build_recommendations(metrics: EmployeeRiskMetrics) -> list[str]:
     return recs
 
 
-
 class RiskAnalyticsService:
-
     def calculate_employee_metrics(
         self,
         employee: Employee,
@@ -258,7 +253,9 @@ class RiskAnalyticsService:
         else:
             last_updated = _make_aware(schedule.updated_at)
             days_since_update = max(0, (now - last_updated).days)
-            actuality_score = max(0.0, 1.0 - days_since_update / MAX_DAYS_WITHOUT_UPDATE)
+            actuality_score = max(
+                0.0, 1.0 - days_since_update / MAX_DAYS_WITHOUT_UPDATE
+            )
 
         if schedule is None or not events:
             meetings_out = 0
@@ -267,7 +264,8 @@ class RiskAnalyticsService:
         else:
             meetings_total = len(events)
             meetings_out = sum(
-                1 for ev in events
+                1
+                for ev in events
                 if _is_event_outside_schedule(ev.start_at, ev.end_at, schedule)
             )
             out_of_schedule_ratio = (
@@ -351,8 +349,6 @@ class RiskAnalyticsService:
             overloaded_count=sum(
                 1 for m in metrics_list if m.load_level > OVERLOAD_THRESHOLD
             ),
-            tz_conflict_count=sum(
-                1 for m in metrics_list if m.timezone_conflict > 0
-            ),
+            tz_conflict_count=sum(1 for m in metrics_list if m.timezone_conflict > 0),
             high_risk_count=sum(1 for m in metrics_list if m.integral_risk > 0.6),
         )

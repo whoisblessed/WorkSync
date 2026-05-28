@@ -9,7 +9,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Выдает асинхронное подключение к БД
     """
-    #мяу
+    # мяу
 
     async with async_session_maker() as session:
         try:

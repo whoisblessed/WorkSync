@@ -9,7 +9,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app.name,
         summary=f"ANIME{''.join([str(i) for i in range(1, 68)])}",
-        version="1.4.8.8",
+        version="1.0.0",
     )
 
     app.include_router(api_router)
@@ -17,7 +17,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
-            "http://localhost:5173",  # Порт Vite
+            "http://localhost:5173",
             "http://127.0.0.1:5173",
             "http://localhost:3000",
             "http://127.0.0.1:3000",

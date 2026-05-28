@@ -17,9 +17,7 @@ class EmployeeRiskSchema(BaseModel):
     ]
     days_since_update: Annotated[
         int,
-        Field(
-            description="Кол-во дней с момента последнего обновления графика (di)"
-        ),
+        Field(description="Кол-во дней с момента последнего обновления графика (di)"),
     ]
     out_of_schedule_ratio: Annotated[
         float,
@@ -35,13 +33,9 @@ class EmployeeRiskSchema(BaseModel):
     ]
     load_level: Annotated[
         float,
-        Field(
-            description="Уровень загрузки Li = Hbusy/Hwork; >0.8 — перегрузка"
-        ),
+        Field(description="Уровень загрузки Li = Hbusy/Hwork; >0.8 — перегрузка"),
     ]
-    hours_busy: Annotated[
-        float, Field(description="Занятых часов за период (Hbusy)")
-    ]
+    hours_busy: Annotated[float, Field(description="Занятых часов за период (Hbusy)")]
     hours_work: Annotated[
         float,
         Field(description="Рабочих часов по графику за период (Hwork)"),
@@ -49,13 +43,13 @@ class EmployeeRiskSchema(BaseModel):
     timezone_conflict: Annotated[
         float, Field(description="Признак конфликта часового пояса Zi (0 или 1)")
     ]
-    timezone_note: Annotated[str, Field(default="", description="Описание конфликта TZ")]
+    timezone_note: Annotated[
+        str, Field(default="", description="Описание конфликта TZ")
+    ]
     time_zone: Annotated[str, Field(description="Часовой пояс из расписания")]
     hr_calendar_mismatch: Annotated[
         float,
-        Field(
-            description="Расхождение HR-данных и календаря Hi, диапазон [0..1]"
-        ),
+        Field(description="Расхождение HR-данных и календаря Hi, диапазон [0..1]"),
     ]
     integral_risk: Annotated[
         float,

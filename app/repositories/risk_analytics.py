@@ -11,7 +11,6 @@ from app.models.employee_event import EmployeeEvent
 
 
 class RiskAnalyticsRepository:
-
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
@@ -58,9 +57,7 @@ class RiskAnalyticsRepository:
         result = await self.session.scalars(stmt)
         return list(result.all())
 
-    async def get_schedule_for_employee(
-        self, employee_id: int
-    ) -> Schedule | None:
+    async def get_schedule_for_employee(self, employee_id: int) -> Schedule | None:
         return await self.session.scalar(
             select(Schedule).where(
                 Schedule.employee_id == employee_id,
@@ -78,5 +75,3 @@ class RiskAnalyticsRepository:
             )
         )
         return list(result.all())
-
-    #meowmeow

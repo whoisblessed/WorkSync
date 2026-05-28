@@ -32,7 +32,6 @@ def get_risk_service() -> RiskAnalyticsService:
     return RiskAnalyticsService()
 
 
-
 async def _build_metrics_list(
     repo: RiskAnalyticsRepository,
     service: RiskAnalyticsService,
@@ -43,10 +42,7 @@ async def _build_metrics_list(
     now = datetime.now(tz=timezone.utc)
     period_start = now - timedelta(days=period_days)
 
-    # Определяем фильтр по команде/менеджеру
-    manager_user_id = (
-        current_user.id if current_user.role == Role.manager else None
-    )
+    manager_user_id = current_user.id if current_user.role == Role.manager else None
 
     employees = await repo.get_employees_with_relations(
         manager_user_id=manager_user_id,
@@ -56,9 +52,7 @@ async def _build_metrics_list(
     metrics_list = []
     for emp in employees:
         schedule = await repo.get_schedule_for_employee(emp.id)
-        events = await repo.get_events_for_employee_in_period(
-            emp.id, period_start, now
-        )
+        events = await repo.get_events_for_employee_in_period(emp.id, period_start, now)
         exceptions = await repo.get_exceptions_for_employee(emp.id)
 
         m = service.calculate_employee_metrics(
@@ -101,9 +95,7 @@ async def get_risk_table(
     period_days: int = Query(
         default=30, ge=1, le=365, description="Период анализа в днях"
     ),
-    department_id: int | None = Query(
-        default=None, description="Фильтр по ID команды"
-    ),
+    department_id: int | None = Query(default=None, description="Фильтр по ID команды"),
     sort_by: str = Query(
         default="integral_risk",
         description="Поле сортировки: integral_risk | actuality_score | load_level | out_of_schedule_ratio | days_since_update",
@@ -117,7 +109,6 @@ async def get_risk_table(
         repo, service, current_user, period_days, department_id
     )
 
-    # Сортировка
     metrics_list.sort(
         key=lambda m: getattr(m, sort_by, 0),
         reverse=sort_desc,
@@ -125,11 +116,8 @@ async def get_risk_table(
 
     summary = service.calculate_team_summary(metrics_list)
 
-    # Конвертируем dataclass → Pydantic через dict
     return TeamRiskSummarySchema(
-        employees=[
-            EmployeeRiskSchema(**m.__dict__) for m in summary.employees
-        ],
+        employees=[EmployeeRiskSchema(**m.__dict__) for m in summary.employees],
         total_employees=summary.total_employees,
         outdated_count=summary.outdated_count,
         overloaded_count=summary.overloaded_count,
@@ -158,20 +146,13 @@ async def get_employee_risk(
     now = datetime.now(tz=timezone.utc)
     period_start = now - timedelta(days=period_days)
 
-    # Загружаем сотрудников, доступных текущему пользователю
-    manager_user_id = (
-        current_user.id if current_user.role == Role.manager else None
-    )
-    employees = await repo.get_employees_with_relations(
-        manager_user_id=manager_user_id
-    )
+    manager_user_id = current_user.id if current_user.role == Role.manager else None
+    employees = await repo.get_employees_with_relations(manager_user_id=manager_user_id)
 
     if current_user.role == Role.employee:
         employee = next((e for e in employees if e.user_id == current_user.id), None)
         if employee is None or employee.id != employee_id:
-            raise ForbiddenException(
-                "Доступ к метрикам другого сотрудника запрещён."
-            )
+            raise ForbiddenException("Доступ к метрикам другого сотрудника запрещён.")
     else:
         employee = next((e for e in employees if e.id == employee_id), None)
 
