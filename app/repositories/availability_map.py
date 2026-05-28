@@ -19,23 +19,15 @@ class AvailabilityRepository:
         tz: str,
         manager_id: int | None = None,
     ) -> list[Employee]:
-        """
-        Returns all active employees (optionally filtered by manager)
-        with their schedule, schedule_exceptions and events eagerly loaded.
-        Only exceptions and events that overlap the requested month are included.
-        """
         from app.models import Team
 
-        # First/last day of the month in the HR/manager timezone
         user_tz = pytz.timezone(tz)
         first_day = date(year, month, 1)
-        # last day of month
         if month == 12:
             last_day = date(year + 1, 1, 1)
         else:
             last_day = date(year, month + 1, 1)
 
-        # month start/end as tz-aware datetimes for event overlap check
         month_start_dt = user_tz.localize(datetime(year, month, 1, 0, 0, 0)).astimezone(
             timezone.utc
         )
@@ -43,7 +35,6 @@ class AvailabilityRepository:
             datetime(last_day.year, last_day.month, last_day.day, 0, 0, 0)
         ).astimezone(timezone.utc)
 
-        # Build employee query
         stmt = (
             select(Employee)
             .where(Employee.is_active)
@@ -58,11 +49,8 @@ class AvailabilityRepository:
 
         employees = (await self.session.scalars(stmt)).all()
 
-        # Filter exceptions and events to the month in Python
-        # (avoids complex subquery joins while keeping code readable)
         result = []
         for emp in employees:
-            # Keep only exceptions that overlap [first_day, last_day)
             emp._month_exceptions = [
                 exc
                 for exc in emp.schedule_exceptions
@@ -70,7 +58,6 @@ class AvailabilityRepository:
                 and exc.start_date < last_day
                 and exc.end_date >= first_day
             ]
-            # Keep only events that overlap the month window (UTC comparison)
             emp._month_events = [
                 ev
                 for ev in emp.events

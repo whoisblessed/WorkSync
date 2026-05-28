@@ -55,10 +55,8 @@ class ProfileService:
         schedule = None
 
         if employee.team_id is not None:
-            try:
-                team = await self.team_service.get_by_id(employee.team_id, current_user)
-            except NotFoundException, ForbiddenException:
-                pass
+            team = await self.team_service.get_by_id(employee.team_id, current_user)
+
 
         try:
             schedule = await self.schedule_service.get_by_user_id(employee.user_id)

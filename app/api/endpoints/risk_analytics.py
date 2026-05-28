@@ -1,14 +1,3 @@
-"""
-Эндпоинты экрана «Конфликты и риски».
-
-GET /api/risk-analytics/
-    Таблица сотрудников с рассчитанными метриками.
-    Query-параметры: period_days, department_id, sort_by, sort_desc, group_by
-
-GET /api/risk-analytics/{employee_id}
-    Детальные метрики одного сотрудника + рекомендации.
-"""
-
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -43,7 +32,6 @@ def get_risk_service() -> RiskAnalyticsService:
     return RiskAnalyticsService()
 
 
-# ─── Вспомогательная функция сборки метрик ───────────────────────────────────
 
 async def _build_metrics_list(
     repo: RiskAnalyticsRepository,
@@ -84,8 +72,6 @@ async def _build_metrics_list(
 
     return metrics_list
 
-
-# ─── Эндпоинты ───────────────────────────────────────────────────────────────
 
 ALLOWED_SORT_FIELDS = {
     "integral_risk",
@@ -180,7 +166,6 @@ async def get_employee_risk(
         manager_user_id=manager_user_id
     )
 
-    # Для роли employee — только свой профиль
     if current_user.role == Role.employee:
         employee = next((e for e in employees if e.user_id == current_user.id), None)
         if employee is None or employee.id != employee_id:

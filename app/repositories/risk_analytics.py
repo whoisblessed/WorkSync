@@ -1,8 +1,3 @@
-"""
-Репозиторий для аналитики рисков.
-Содержит запросы, необходимые для расчёта метрик по экрану «Конфликты и риски».
-"""
-
 from __future__ import annotations
 
 from datetime import datetime
@@ -16,10 +11,6 @@ from app.models.employee_event import EmployeeEvent
 
 
 class RiskAnalyticsRepository:
-    """
-    Не наследует BaseRepository — работает с несколькими моделями
-    и предоставляет специфичные запросы для аналитики.
-    """
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
@@ -29,13 +20,6 @@ class RiskAnalyticsRepository:
         manager_user_id: int | None = None,
         team_id: int | None = None,
     ) -> list[Employee]:
-        """
-        Возвращает список активных сотрудников с предзагруженными
-        schedule и schedule_exceptions.
-
-        - manager_user_id: если передан, возвращает только сотрудников из команд этого менеджера.
-        - team_id: дополнительный фильтр по команде.
-        """
         stmt = (
             select(Employee)
             .options(
@@ -61,9 +45,6 @@ class RiskAnalyticsRepository:
         period_start: datetime,
         period_end: datetime,
     ) -> list[Event]:
-        """
-        Возвращает все активные события сотрудника в заданном временном диапазоне.
-        """
         stmt = (
             select(Event)
             .join(EmployeeEvent, Event.id == EmployeeEvent.event_id)
@@ -80,7 +61,6 @@ class RiskAnalyticsRepository:
     async def get_schedule_for_employee(
         self, employee_id: int
     ) -> Schedule | None:
-        """Возвращает активное расписание сотрудника."""
         return await self.session.scalar(
             select(Schedule).where(
                 Schedule.employee_id == employee_id,
@@ -91,7 +71,6 @@ class RiskAnalyticsRepository:
     async def get_exceptions_for_employee(
         self, employee_id: int
     ) -> list[ScheduleException]:
-        """Возвращает все активные исключения (отпуска, больничные …) сотрудника."""
         result = await self.session.scalars(
             select(ScheduleException).where(
                 ScheduleException.employee_id == employee_id,
