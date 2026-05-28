@@ -78,3 +78,5 @@ class RiskAnalyticsRepository:
             )
         )
         return list(result.all())
+
+    #meowmeow
