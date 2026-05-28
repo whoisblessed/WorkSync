@@ -6,6 +6,7 @@ from .schedule import ScheduleService
 from .schedule_exception import ScheduleExceptionService
 from .event import EventService
 from .profile import ProfileService
+from .availability_map import AvailabilityMapService
 
 __all__ = [
     "AuthService",
@@ -17,4 +18,5 @@ __all__ = [
     "EventServiceProfileService",
     "EventService",
     "ProfileService",
+    "AvailabilityMapService",
 ]

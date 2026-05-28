@@ -6,6 +6,7 @@ from .sсhedule import ScheduleRepository
 from .schedule_exception import ScheduleExceptionRepository
 from .event import EventRepository
 from .employee_event import EmployeeEventRepository
+from .availability_map import AvailabilityRepository
 
 __all__ = [
     "BaseRepository",
@@ -16,4 +17,5 @@ __all__ = [
     "ScheduleExceptionRepository",
     "EventRepository",
     "EmployeeEventRepository",
+    "AvailabilityRepository",
 ]

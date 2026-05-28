@@ -18,6 +18,7 @@ from app.repositories import (
     ScheduleExceptionRepository,
     EventRepository,
     EmployeeEventRepository,
+    AvailabilityRepository,
 )
 from app.services import (
     AuthService,
@@ -28,6 +29,7 @@ from app.services import (
     ScheduleExceptionService,
     EventService,
     ProfileService,
+    AvailabilityMapService,
 )
 
 
@@ -66,6 +68,10 @@ def get_event_repository(session: DBSession) -> EventRepository:
 
 def get_employee_event_repository(session: DBSession) -> EmployeeEventRepository:
     return EmployeeEventRepository(session)
+
+
+def get_availability_repository(session: DBSession) -> AvailabilityRepository:
+    return AvailabilityRepository(session)
 
 
 # Сервисы
@@ -149,6 +155,14 @@ def get_profile_service(
         schedule_exception_service,
         event_service,
     )
+
+
+def get_availability_service(
+    availability_repository: Annotated[
+        AvailabilityRepository, Depends(get_availability_repository)
+    ],
+) -> AvailabilityMapService:
+    return AvailabilityMapService(availability_repository)
 
 
 # Аутентификация
